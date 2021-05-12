@@ -1,10 +1,13 @@
 
+% Function that outputs joint torque vector from equilibrium point model.
+% Should Work with for t=3
+
 function nOut = eqPoint(t,z)
     % Compute Equilibrium-Point Motion
     % z = [th1; th2; th3; om1; om2; om3];
     
     % Get desired/equilibrium joint angles
-    th_eq = getVideoPoints("tennis_serve_video.mov");
+    th_eq = getVideoPoints(t, "tennis_serve_video.mov");
    
     th_act1 = z(1);
     th_act2 = z(2);
