@@ -1,6 +1,7 @@
+
 function th_eq = getVideoPoints(t, fileName)
 % Extrapolate 8 3x2 joint motion trajectory coordinates from video.
-    clc; close all;
+    %clc; close all;
     video = VideoReader(fileName); % 2.11 seconds
     videoFrames = video.NumFrames; % 128 frames
     frame = 1:10:videoFrames-56; % get 8 points
@@ -34,7 +35,7 @@ function th_eq = getVideoPoints(t, fileName)
   
   freq = 100;
   sampleRate = t/(1/freq); % specify number of points 
-  
+  %sampleRate = 300;
   figure; title("Shoulder");
   SplineFit = fit(shoulder_X,shoulder_Y, 'smoothingspline');
   plot(SplineFit, shoulder_X, shoulder_Y);
@@ -54,6 +55,6 @@ function th_eq = getVideoPoints(t, fileName)
   interpolated_y3 = feval(SplineFit3, interpolated_x3);
   th3_eq = atan(interpolated_y3./interpolated_x3');
   
-  th_eq = [th1_eq; th2_eq; th3_eq];
+  th_eq = [th1_eq, th2_eq, th3_eq];
   
 end
