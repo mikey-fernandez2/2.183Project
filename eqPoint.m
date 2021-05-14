@@ -4,7 +4,7 @@ function nOut = eqPoint(t,z)
     % z = [th1; th2; th3; om1; om2; om3];
    
     % Get desired/equilibrium joint angles
-    th_eq = getVideoPoints(3, "tennis_serve_video.mov"); % t=3s
+    th_eq = getVideoPoints(t, "tennis_serve_video.mov"); % works with t=3s right now, (300 samples)
     
     th_act1 = z(1); th_act2 = z(2); th_act3 = z(3);
     th_act =[th_act1, th_act2, th_act3];
@@ -13,7 +13,7 @@ function nOut = eqPoint(t,z)
     om_act = [om_act1, om_act2, om_act3];
     
     % Tunable Parameters
-    w = 7; % natural frequency of upper arm (Hz)
+    w = 3; % natural frequency of upper arm (Hz)
     % get joint stiffnesses by assuming natural frequency
     k_shoulder = w^2*m1;
     k_elbow = w^2*m2;
