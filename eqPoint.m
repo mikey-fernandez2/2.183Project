@@ -13,20 +13,24 @@ function nOut = eqPoint(t, z, p, th_eq, timeVec)
     om_1 = z(4); om_2 = z(5); om_3 = z(6);
     om = [om_1; om_2; om_3];
     
+    I_mat = A_tennisServe(z, p);
+    
     % Tunable Parameters
-    wnHz = 3; % natural frequency of upper arm (Hz)
-    wn = 2*pi*wnHz;
-    Ic1 = p(4); Ic2 = p(5); Ic3 = p(6);
+    wnHz = 5; % natural frequency of arm movement (Hz)
+    wn = 2*pi*wnHz; % convert to rad/s
+    
     % get joint stiffnesses by assuming natural frequency
-    k_shoulder = wn^2*Ic1;
-    k_elbow = wn^2*Ic2;
-    k_wrist = wn^2*Ic3;
-    k=[k_shoulder, k_elbow, k_wrist];
-    % get damping coefficients from critically damped damping ratio
-    b_shoulder = 2*sqrt(k_shoulder/Ic1);
-    b_elbow = 2*sqrt(k_elbow/Ic2);
-    b_wrist = 2*sqrt(k_wrist/Ic3);
-    b=[b_shoulder, b_elbow, b_wrist]; 
+    k_shoulder = wn^2*I_mat(1, 1);
+    k_elbow = wn^2*I_mat(2, 2);
+    k_wrist = wn^2*I_mat(3, 3);
+    k = [k_shoulder, k_elbow, k_wrist];
+    
+    % get damping coefficients assuming critical damping
+    b_shoulder = 2*sqrt(k_shoulder/I_mat(1, 1));
+    b_elbow = 2*sqrt(k_elbow/I_mat(2, 2));
+    b_wrist = 2*sqrt(k_wrist/I_mat(3, 3));
+    b = [b_shoulder, b_elbow, b_wrist]; 
+    
     K = diag(k);
     B = diag(b);
     
