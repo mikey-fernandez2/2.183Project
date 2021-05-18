@@ -1,33 +1,33 @@
-% function getVideoPoints(fileName)
+function getVideoPoints(fileName)
 % Get points from a video and convert them to joint trajectories
-% close all; clc;
-fileName = "tennis_serve_video.mov";
+close all; clc;
+% fileName = "tennis_serve_video.mov";
     video = VideoReader(fileName); % 2.11 seconds
     time = video.Duration; % video length, sec
     videoFrames = video.NumFrames; % 128 frames
     frames = 1:10:videoFrames - 56; % get points from 8 frames
 
-%     videoPoints = [];
+    videoPoints = [];
     counter = 1;
     
-%     for i = frames
-%        currentFrame = read(video, i);
-%        imshow(currentFrame);
-%        
-%        [rows, cols, colors] = size(currentFrame);
-%        
-%        x = []; y = [];
-%        while(length(x) ~= 4 || length(y) ~= 4)
-%         [x, y] = getpts;
-%        end
-%        
-%        coords = [x (rows - y + 1)];
-%        videoPoints(:, :, counter) = coords;
-%        counter = counter + 1;
-%     end
-%     
-%     close all;
-    load('EQTrajectory.mat', 'videoPoints');
+    for i = frames
+       currentFrame = read(video, i);
+       imshow(currentFrame);
+       
+       [rows, cols, colors] = size(currentFrame);
+       
+       x = []; y = [];
+       while(length(x) ~= 4 || length(y) ~= 4)
+        [x, y] = getpts;
+       end
+       
+       coords = [x (rows - y + 1)];
+       videoPoints(:, :, counter) = coords;
+       counter = counter + 1;
+    end
+    
+    close all;
+%     load('EQTrajectory.mat', 'videoPoints');
     
     % Fit the data to a curve, interpolate points & calculate joint angles.
 
@@ -55,14 +55,15 @@ fileName = "tennis_serve_video.mov";
     freq = 100;
     numPoints = time/(1/freq); % specify number of points
     
-%     timeVec = 0:1/freq:time;
-%     timeVec = timeVec(1:length(th_eq));
     th1_interp = spline(frames, th1_abs, 1:frames(end));
     th2_interp = spline(frames, th2_abs, 1:frames(end));
     th3_interp = spline(frames, th3_abs, 1:frames(end));
     th1_interp = resample(th1_interp, fix(numPoints), length(th1_interp));
     th2_interp = resample(th2_interp, fix(numPoints), length(th2_interp));
     th3_interp = resample(th3_interp, fix(numPoints), length(th3_interp));
+   
+    timeVec = 0:1/freq:time;
+    timeVec = timeVec(1:length(th1_interp));
     
 %     shoulder_interp_x = []; shoulder_interp_y = [];
 %     elbow_interp_x = []; elbow_interp_y = [];
@@ -157,4 +158,4 @@ fileName = "tennis_serve_video.mov";
     legend({'1', '2', '3'})
     
     save('EQTrajectory.mat', 'th_eq', 'timeVec', 'videoPoints');
-% end
+end

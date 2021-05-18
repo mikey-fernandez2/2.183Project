@@ -6,9 +6,12 @@
 clc; close all; clear all;
 
 %% Parameters
-global p th_eq timeVec % parameters
+global p th_eq timeVec pos vel acc CONTROLLER % parameters
+
+CONTROLLER = false; % false for EQ Point, true for Computed Torque
 
 load('EQTrajectory.mat', 'th_eq', 'timeVec')
+load('ComputedTorqueTrajectory.mat', 'pos', 'vel', 'acc')
 
 % set parameter values
 % Reference:
@@ -22,19 +25,27 @@ Ic1 = m1*rg1^2; Ic2 = m2*rg2^2; Ic3 = m3*rg3^2; % kg-m^2, moment of inertia abou
 g = 9.81;                                       % m/s^2, gravity constant
 k1 = 0; k2 = 0; k3 = 0;                         % N-m/rad, joint stiffness constants
 b1 = 0; b2 = 0; b3 = 0;                         % N-m-s/rad, joint damping constants
-
 l_max = l1 + l2 + l3;                           % m, maximum arm reach
 
 p = [m1 m2 m3 Ic1 Ic2 Ic3 l1 l2 l3 r1 r2 r3 g k1 k2 k3 b1 b2 b3]';
 
 %% Calculate and plot motions
-th0 = 0.9*th_eq(:, 1);
-% th0 = [0; 0; 0];
+if ~CONTROLLER
+    th0 = 0.9*th_eq(:, 1);
+else
+    th0 = pos(:, 1);
+end
+
 om0 = [0; 0; 0];
 z0 = [th0; om0];
 
-freq = 100;
-tSpan = 0:1/freq:timeVec(end);
+if ~CONTROLLER
+    freq = 100;
+    tSpan = 0:1/freq:timeVec(end);
+else
+    freq = 60;
+    tSpan = 0:1/freq:length(pos)/freq;
+end
 
 [tOut, yOut] = ode45(@stateEqs, tSpan, z0);
 th1 = yOut(:, 1); th2 = yOut(:, 2); th3 = yOut(:, 3);
@@ -59,14 +70,19 @@ end
 %% Functions
 function dxdt = stateEqs(t, z)
 % z = [th1; th2; th3; om1; om2; om3]
-    global p th_eq timeVec
+    global p th_eq timeVec pos vel acc CONTROLLER
     
     dxdt = zeros(6, 1);
     
-    % get input force, torque (SET ME AS FUNCTIONS!)
+    % get input force, torque
     F = [0; 0];
-%     T = [0; 0; 0];
-    T = eqPoint(t, z, p, th_eq, timeVec);
+    
+    if ~CONTROLLER
+        T = eqPoint(t, z, p, th_eq, timeVec);
+    else
+        T = computedTorque(t, p, pos, vel, acc);
+    end
+    
     u = [F; T];
     
     % get velocities (the last three states)
@@ -77,9 +93,9 @@ function dxdt = stateEqs(t, z)
     b = b_tennisServe(z, u, p);
     
     % Then A\b solves for the acceleration at this time step
-    acc = A\b;
+    alpha = A\b;
 
     % get the time derivative of the state vector
     dxdt(1:3) = om;
-    dxdt(4:6) = acc;
+    dxdt(4:6) = alpha;
 end
