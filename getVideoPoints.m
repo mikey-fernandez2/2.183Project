@@ -1,33 +1,34 @@
-function getVideoPoints(fileName)
+%function getVideoPoints(fileName)
 % Get points from a video and convert them to joint trajectories
 close all; clc;
-% fileName = "tennis_serve_video.mov";
+ fileName = "tennis_serve_video.mov";
     video = VideoReader(fileName); % 2.11 seconds
     time = video.Duration; % video length, sec
-    videoFrames = video.NumFrames; % 128 frames
-    frames = 1:10:videoFrames - 56; % get points from 8 frames
+    videoFrames = video.NumFrames; % 127 frames
+    frames = 1:14:videoFrames; % get points from 9 frames
 
     videoPoints = [];
     counter = 1;
     
-    for i = frames
-       currentFrame = read(video, i);
-       imshow(currentFrame);
-       
-       [rows, cols, colors] = size(currentFrame);
-       
-       x = []; y = [];
-       while(length(x) ~= 4 || length(y) ~= 4)
-        [x, y] = getpts;
-       end
-       
-       coords = [x (rows - y + 1)];
-       videoPoints(:, :, counter) = coords;
-       counter = counter + 1;
-    end
-    
+%     for i = frames
+%        currentFrame = read(video, i);
+%        imshow(currentFrame);
+%        
+%        [rows, cols, colors] = size(currentFrame);
+%        
+%        x = []; y = [];
+%        while(length(x) ~= 4 || length(y) ~= 4)
+%         [x, y] = getpts;
+%        end
+%        
+%        coords = [x (rows - y + 1)];
+%        videoPoints(:, :, counter) = coords;
+%        counter = counter + 1;
+%     end
+   
     close all;
-%     load('EQTrajectory.mat', 'videoPoints');
+    
+    load('EQTrajectory.mat', 'videoPoints');
     
     % Fit the data to a curve, interpolate points & calculate joint angles.
 
@@ -54,14 +55,15 @@ close all; clc;
 
     freq = 100;
     numPoints = time/(1/freq); % specify number of points
-    
+   
+
     th1_interp = spline(frames, th1_abs, 1:frames(end));
     th2_interp = spline(frames, th2_abs, 1:frames(end));
     th3_interp = spline(frames, th3_abs, 1:frames(end));
     th1_interp = resample(th1_interp, fix(numPoints), length(th1_interp));
     th2_interp = resample(th2_interp, fix(numPoints), length(th2_interp));
     th3_interp = resample(th3_interp, fix(numPoints), length(th3_interp));
-   
+  
     timeVec = 0:1/freq:time;
     timeVec = timeVec(1:length(th1_interp));
     
@@ -148,14 +150,17 @@ close all; clc;
     plot(th1_interp)
     plot(th2_interp)
     plot(th3_interp)
-    legend({'1', '2', '3'})
+    legend({'Upper Arm', 'Forearm', 'Hand'})
+    title('Interpolated Limb Trajectories, fitted with a Smoothing Spline');
     
     figure
     hold on
     plot(th1_eq)
     plot(th2_eq)
     plot(th3_eq)
-    legend({'1', '2', '3'})
+    legend({'Shoulder', 'Elbow', 'Wrist'})
+    title('Joint Equilibrium Trajectories');
     
     save('EQTrajectory.mat', 'th_eq', 'timeVec', 'videoPoints');
-end
+%end
+
