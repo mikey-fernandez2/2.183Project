@@ -10,7 +10,7 @@ global p th_eq timeVec pos vel acc CONTROLLER % parameters
 
 CONTROLLER = false; % false for EQ Point, true for Computed Torque
 
-load('EQTrajectory.mat', 'th_eq', 'timeVec')
+load('EQTrajectory_new.mat', 'th_eq', 'timeVec')
 load('ComputedTorqueTrajectory.mat', 'pos', 'vel', 'acc')
 
 % set parameter values
@@ -41,7 +41,7 @@ z0 = [th0; om0];
 
 if ~CONTROLLER
     freq = 60;
-    tSpan = 0:1/freq:timeVec(end);
+    tSpan = 0:1/freq:timeVec(240);
 else
     freq = 60;
     tSpan = 0:1/freq:length(pos)/freq;
@@ -66,23 +66,23 @@ for i = 1:length(tOut)
     
     pause(0.001)
 end
-
+figTimeVec = 0:1/freq:4;
 % Plot Joint Trajectories
 figure
-plot(timeVec, th1, 'b')
+plot(figTimeVec, th1, 'b')
 hold on
-plot(timeVec, th2, 'r')
-plot(timeVec, th3, 'g')
+plot(figTimeVec, th2, 'r')
+plot(figTimeVec, th3, 'g')
 title("Joint Trajectories")
 
 % Plot Hand Trajectory
 figure
-plot(timeVec, th3)
+plot(figTimeVec, th3)
 title("Hand Trajectory");
 
 % Plot Hand Velocity
 figure
-plot(timeVec,om3)
+plot(figTimeVec,om3)
 title("Hand Velocity");
 
 %% Functions
