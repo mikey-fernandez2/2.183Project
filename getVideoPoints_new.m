@@ -7,35 +7,26 @@ close all; clc;
     raw = readtable(fileName);
     freq = 60; % FPS
 
-    frames = 1333:15:size(raw,1);
+    frames = 1333:14:240+1333; %size(raw,1);
     time = (frames(end) - frames(1))/freq;
     numPoints = time/(1/freq); % specify number of points
-    % Extract frames from raw mocap data.
-%     shoulder_X = raw.shoulder_x(frames); shoulder_Y = raw.shoulder_y(frames);
-%     elbow_X = raw.elbow_x(frames); elbow_Y = raw.elbow_y(frames);
-%     wrist_X = raw.wrist_x(frames); wrist_Y = raw.wrist_y(frames);
-%     hand_X = raw.racket_x(frames); hand_Y = raw.racket_y(frames);
-%     
-%     upperArmDir = [elbow_X - shoulder_X, elbow_Y - shoulder_Y];
-%     forearmDir = [wrist_X - elbow_X, wrist_Y - elbow_Y];
-%     handDir = [hand_X - wrist_X, hand_Y - wrist_Y];
-
-    upperArmDir = [raw.shoulder_dircetion_x(frames), raw.shoulder_dircetion_y(frames)];
-    forearmDir = [raw.elbow_direction_x(frames), raw.elbow_direction_y(frames)];
-    handDir = [raw.wrist_direction_x(frames), raw.wrist_direction_y(frames)];
-
-    th1_abs = atan2(upperArmDir(:, 2), upperArmDir(:, 1));% th1_abs(th1_abs < 0) = 2*pi + th1_abs(th1_abs < 0);%ind1 = find(th1_abs > 0, 1, 'first'); th1_abs(1:ind1 - 1) = 2*pi + th1_abs(1:ind1 - 1);
-    th2_abs = atan2(forearmDir(:, 2), forearmDir(:, 1));% th2_abs(th2_abs < 0) = 2*pi + th2_abs(th2_abs < 0);
-    th3_abs = atan2(handDir(:, 2), handDir(:, 1)); %th3_abs(th3_abs < 0) = 2*pi + th3_abs(th3_abs < 0);
     
-    figure
-    hold on
-    plot(th1_abs)
-    plot(th2_abs)
-    plot(th3_abs)
-    legend({'Shoulder', 'Elbow', 'Wrist'})
-    title('Raw Joint Trajectories');
-   
+    % Extract frames from raw mocap data.
+    shoulder_X = raw.shoulder_x(frames); shoulder_Y = raw.shoulder_y(frames);
+    elbow_X = raw.elbow_x(frames); elbow_Y = raw.elbow_y(frames);
+    wrist_X = raw.wrist_x(frames); wrist_Y = raw.wrist_y(frames);
+    hand_X = raw.racket_x(frames); hand_Y = raw.racket_y(frames);
+    
+    upperArmDir = [elbow_X - shoulder_X, elbow_Y - shoulder_Y];
+    forearmDir = [wrist_X - elbow_X, wrist_Y - elbow_Y];
+    handDir = [hand_X - wrist_X, hand_Y - wrist_Y];
+    
+    th1_abs = -atan2(upperArmDir(:, 2), upperArmDir(:, 1)); %th1_abs(th1_abs < 0) = 2*pi + th1_abs(th1_abs < 0);%ind1 = find(th1_abs > 0, 1, 'first'); th1_abs(1:ind1 - 1) = 2*pi + th1_abs(1:ind1 - 1);
+    th2_abs = -atan2(forearmDir(:, 2), forearmDir(:, 1)); %th2_abs(th2_abs < 0) = 2*pi + th2_abs(th2_abs < 0);
+    %th3_abs = -atan2(handDir(:, 2), handDir(:, 1)); %th3_abs(th3_abs < 0) = 2*pi + th3_abs(th3_abs < 0);
+    th3_abs = [0,0,0,0,0,pi/4,pi/2,pi/2,pi/2,pi/4,pi/4,0,0,0,0,0,0,0];
+
+
     th1_interp = spline(frames, th1_abs, frames(1):frames(end));
     th2_interp = spline(frames, th2_abs, frames(1):frames(end));
     th3_interp = spline(frames, th3_abs, frames(1):frames(end));
@@ -45,8 +36,8 @@ close all; clc;
     
     th1_eq = th1_interp;
     th2_eq = th2_interp - th1_interp;
-    th3_eq = th3_interp - th2_interp;
-     
+    th3_eq = th3_interp;
+ 
     timeVec = 0:1/freq:time;
     timeVec = timeVec(1:length(th1_interp));
     
@@ -69,5 +60,5 @@ close all; clc;
     legend({'Shoulder', 'Elbow', 'Wrist'})
     title('Joint Equilibrium Trajectories');
     
-%     save('EQTrajectory_new.mat', 'th_eq', 'timeVec');
+    save('EQTrajectory_new.mat', 'th_eq', 'timeVec');
 %end

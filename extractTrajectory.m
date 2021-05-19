@@ -5,13 +5,12 @@
 % fileName = "MoCap.csv";
 fileName = 'Direction2894.mat';
 
-
-
 % put testingStuff here
 load('EQTrajectory_new.mat')
 
 frameRate = 60;
 frameTime = 1/60;
+timeVec = 0:frameTime:frameTime*(length(pos) - 1);
 
 pos = th_eq;
 vel = diff(th_eq, 1, 2)/frameTime; vel = [vel vel(:, end)];
@@ -29,11 +28,17 @@ acc(3, :) = smooth(acc(3, :), 30);
 
 figure
 subplot(311)
-plot(th_eq.')
+plot(timeVec, th_eq.')
+ylabel('\theta (rad)')
 subplot(312)
-plot(vel.')
+plot(timeVec, vel.')
+ylabel('\omega (rad/s)')
 subplot(313)
-plot(acc.')
+plot(timeVec, acc.')
+ylabel('\alpha (ra/s^2)')
+xlabel('Time (s)')
+legend({'Shoulder', 'Elbow', 'Wrist'})
+sgtitle('Desired Joint Kinematics')
 
 save('ComputedTorqueTrajectory.mat', 'pos', 'vel', 'acc')
 

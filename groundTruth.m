@@ -16,16 +16,18 @@ p = [m1 m2 m3 Ic1 Ic2 Ic3 l1 l2 l3 r1 r2 r3 g k1 k2 k3 b1 b2 b3]';
 
 freq = 60;
 
-
 load('ComputedTorqueTrajectory.mat', 'pos', 'vel', 'acc') % load trajectory
 
 framesToTake = 1333:240+1333;
 th = pos(:, framesToTake); th1 = th(1, :); th2 = th(2, :); th3 = th(3, :);
-om = zeros(size(th));
+om = diff(th, 1, 2); om = [om om(:, end)];
+om(:, 1) = smooth(om(:, 1), 3); om(:, 2) = smooth(om(:, 2), 3); om(:, 3) = smooth(om(:, 3), 3);
+
 states = [th; om];
 
 posEE = position_endEffector(states, p);
 velEE = velocity_endEffector(states, p);
+speedEE = sqrt(velEE(1, :).^2 + velEE(2, :).^2);
 
 figure
 for i = 1:length(th)
@@ -58,5 +60,5 @@ title("Hand Trajectory");
 
 % Plot Hand Velocity
 figure
-plot(figTimeVec, velEE)
+plot(figTimeVec, speedEE)
 title("Hand Velocity");

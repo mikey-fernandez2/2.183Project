@@ -8,7 +8,7 @@ clc; close all; clear all;
 %% Parameters
 global p th_eq timeVec pos vel acc CONTROLLER % parameters
 
-CONTROLLER = false; % false for EQ Point, true for Computed Torque
+CONTROLLER = true; % false for EQ Point, true for Computed Torque
 
 load('EQTrajectory_new.mat', 'th_eq', 'timeVec')
 load('ComputedTorqueTrajectory.mat', 'pos', 'vel', 'acc')
@@ -23,8 +23,8 @@ r1 = 0.484*l1; r2 = 0.439*l2; r3 = 0.506*l3;    % m, distance to center of mass 
 rg1 = 0.322*l1; rg2 = 0.303*l2; rg3 = 0.297*l3; % m, radius of gyration of each link 
 Ic1 = m1*rg1^2; Ic2 = m2*rg2^2; Ic3 = m3*rg3^2; % kg-m^2, moment of inertia about mass center
 g = 9.81;                                       % m/s^2, gravity constant
-k1 = 10; k2 = 10; k3 = 10;                         % N-m/rad, joint stiffness constants
-b1 = .1; b2 = 0.1; b3 = 0.1;                         % N-m-s/rad, joint damping constants
+k1 = 0; k2 = 0; k3 = 0;                         % N-m/rad, joint stiffness constants
+b1 = 0.1; b2 = 0.1; b3 = 0.1;                         % N-m-s/rad, joint damping constants
 l_max = l1 + l2 + l3;                           % m, maximum arm reach
 
 p = [m1 m2 m3 Ic1 Ic2 Ic3 l1 l2 l3 r1 r2 r3 g k1 k2 k3 b1 b2 b3]';
@@ -41,10 +41,10 @@ z0 = [th0; om0];
 
 if ~CONTROLLER
     freq = 60;
-    tSpan = 0:1/freq:timeVec(240); %only get 4s
+    tSpan = 0:1/freq:timeVec(end); %only get 4s
 else
     freq = 60;
-    tSpan = 0:1/freq:length(pos)/freq;
+    tSpan = 0:1/freq:(length(pos) - 1)/freq;
 end
 
 [tOut, yOut] = ode45(@stateEqs, tSpan, z0);
@@ -54,7 +54,9 @@ om1 = yOut(:, 4); om2 = yOut(:, 5); om3 = yOut(:, 6);
 z = [th1'; th2'; th3'; om1'; om2'; om3'];
 posEE = position_endEffector(z, p);
 velEE = velocity_endEffector(z, p);
+speedEE = vecnorm(velEE);
 
+%%
 figure
 for i = 1:length(tOut)
     pos_links = keypoints_tennisServe(yOut(i, :)', p);
@@ -70,25 +72,37 @@ for i = 1:length(tOut)
     
     pause(0.001)
 end
-figTimeVec = 1:240;
+
 % Plot Joint Trajectories
 figure
-plot(figTimeVec, th1, 'b')
+plot(tOut, th1, 'b')
 hold on
-plot(figTimeVec, th2, 'r')
-plot(figTimeVec, th3, 'g')
-legend({'Shoulder','Elbow','Wrist'});
-title("Joint Trajectories")
+plot(tOut, th2, 'r')
+plot(tOut, th3, 'g')
+legend({'Shoulder', 'Elbow', 'Wrist'});
+title('Joint Trajectories')
+xlabel('Time (s)')
+ylabel('\theta (rad)')
 
 % Plot Hand Trajectory
 figure
-plot(posEE(1,:), posEE(2,:));
-title("Hand Trajectory");
+hold on
+plot(posEE(1, :), posEE(2, :), 'b');
+plot(posEE(1, 1), posEE(2, 1), '*r')
+plot(posEE(1, end), posEE(2, 2), '*g')
+legend({'Trajectory', 'Start', 'End'})
+title('Hand Trajectory');
+xlabel('x (m)')
+ylabel('y (m)')
+xlim([-l_max l_max]*1.1)
+ylim([-l_max l_max]*1.1)
 
 % Plot Hand Velocity
 figure
-plot(figTimeVec(1:240),velEE(2,:));
-title("Hand Velocity");
+plot(tOut, speedEE);
+title('Hand Speed');
+xlabel('Time (s)')
+ylabel('Speed (m/s)')
 
 %% Functions
 function dxdt = stateEqs(t, z)
