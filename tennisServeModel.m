@@ -41,7 +41,7 @@ z0 = [th0; om0];
 
 if ~CONTROLLER
     freq = 60;
-    tSpan = 0:1/freq:timeVec(240);
+    tSpan = 0:1/freq:timeVec(240); %only get 4s
 else
     freq = 60;
     tSpan = 0:1/freq:length(pos)/freq;
@@ -50,6 +50,10 @@ end
 [tOut, yOut] = ode45(@stateEqs, tSpan, z0);
 th1 = yOut(:, 1); th2 = yOut(:, 2); th3 = yOut(:, 3);
 om1 = yOut(:, 4); om2 = yOut(:, 5); om3 = yOut(:, 6);
+
+z = [th1'; th2'; th3'; om1'; om2'; om3'];
+posEE = position_endEffector(z, p);
+velEE = velocity_endEffector(z, p);
 
 figure
 for i = 1:length(tOut)
@@ -66,23 +70,24 @@ for i = 1:length(tOut)
     
     pause(0.001)
 end
-figTimeVec = 0:1/freq:4;
+figTimeVec = 1:240;
 % Plot Joint Trajectories
 figure
 plot(figTimeVec, th1, 'b')
 hold on
 plot(figTimeVec, th2, 'r')
 plot(figTimeVec, th3, 'g')
+legend({'Shoulder','Elbow','Wrist'});
 title("Joint Trajectories")
 
 % Plot Hand Trajectory
 figure
-plot(figTimeVec, th3)
+plot(posEE(1,:), posEE(2,:));
 title("Hand Trajectory");
 
 % Plot Hand Velocity
 figure
-plot(figTimeVec,om3)
+plot(figTimeVec(1:240),velEE(2,:));
 title("Hand Velocity");
 
 %% Functions
