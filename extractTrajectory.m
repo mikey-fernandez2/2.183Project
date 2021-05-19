@@ -1,17 +1,19 @@
-function extractTrajectory(fileName)
+% function extractTrajectory(fileName)
 % EXTRACTTRAJECTORY gets the angular position, velocity, and acceleration
 % from fileName
 
 % fileName = "MoCap.csv";
+fileName = 'Direction2894.mat'
 
-%raw = readtable(fileName);
+% raw = readtable(fileName);
+% data = raw;
 % shoulderAng = raw.shoulder_angle;
 % elbowAng = raw.elbow_angle;
 % wristAng = raw.wrist_angle;
 
 % loading the data
 data  = load(fileName); % ex: 'Direction2896.mat'
-data = data.Direction2896;
+data = data.Direction2894;
 frameRate = 60; % FPS
 frameTime = 1/frameRate; % s
 
@@ -45,6 +47,20 @@ pos = [shoulderAng'; elbowAng'; wristAng'];
 vel = [shoulderVel'; elbowVel'; wristVel'];
 acc = [shoulderAcc'; elbowAcc'; wristAcc'];
 
-save('ComputedTorqueTrajectory.mat', 'pos', 'vel', 'acc')
+pos = pos(:, 1333:240+1333);
+vel = vel(:, 1333:240+1333);
+acc = acc(:, 1333:240+1333);
 
-end
+figure
+plot(pos.')
+
+figure
+plot(vel.')
+
+figure
+plot(acc.')
+
+
+% save('ComputedTorqueTrajectory.mat', 'pos', 'vel', 'acc')
+
+% end
