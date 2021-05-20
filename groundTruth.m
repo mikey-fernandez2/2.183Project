@@ -18,8 +18,8 @@ freq = 60;
 
 load('ComputedTorqueTrajectory.mat', 'pos', 'vel', 'acc') % load trajectory
 
-framesToTake = 1333:240+1333;
-th = pos(:, framesToTake); th1 = th(1, :); th2 = th(2, :); th3 = th(3, :);
+% framesToTake = 1333:238+1333;
+th = pos(:, :); th1 = th(1, :); th2 = th(2, :); th3 = th(3, :);
 om = diff(th, 1, 2); om = [om om(:, end)];
 om(:, 1) = smooth(om(:, 1), 3); om(:, 2) = smooth(om(:, 2), 3); om(:, 3) = smooth(om(:, 3), 3);
 
@@ -28,6 +28,7 @@ states = [th; om];
 posEE = position_endEffector(states, p);
 velEE = velocity_endEffector(states, p);
 speedEE = sqrt(velEE(1, :).^2 + velEE(2, :).^2);
+tOut - 0:1/freq:length(th)/freq;
 
 figure
 for i = 1:length(th)
@@ -38,27 +39,40 @@ for i = 1:length(th)
     plot(xCoords, yCoords)
     xlabel('x (m)')
     ylabel('y (m)')
-    title(['t = ', num2str(i/60, '%.3f'), ' s']) 
+    title(['t = ', num2str(tOut(i), '%.3f'), ' s']) 
     xlim([-l_max l_max]*1.1)
     ylim([-l_max l_max]*1.1)
     
     pause(0.001)
 end
-figTimeVec = 0:1/freq:4;
+
 % Plot Joint Trajectories
 figure
-plot(figTimeVec, th1, 'b')
+plot(tOut, th1, 'b')
 hold on
-plot(figTimeVec, th2, 'r')
-plot(figTimeVec, th3, 'g')
-title("Joint Trajectories")
+plot(tOut, th2, 'r')
+plot(tOut, th3, 'g')
+legend({'Shoulder', 'Elbow', 'Wrist'});
+title('Joint Trajectories')
+xlabel('Time (s)')
+ylabel('\theta (rad)')
 
 % Plot Hand Trajectory
 figure
-plot(posEE(1, :), posEE(2, :))
-title("Hand Trajectory");
+hold on
+plot(posEE(1, :), posEE(2, :), 'b');
+plot(posEE(1, 1), posEE(2, 1), '*r')
+plot(posEE(1, end), posEE(2, 2), '*g')
+legend({'Trajectory', 'Start', 'End'})
+title('Hand Trajectory');
+xlabel('x (m)')
+ylabel('y (m)')
+xlim([-l_max l_max]*1.1)
+ylim([-l_max l_max]*1.1)
 
 % Plot Hand Velocity
 figure
-plot(figTimeVec, speedEE)
-title("Hand Velocity");
+plot(tOut, speedEE);
+title('Hand Speed');
+xlabel('Time (s)')
+ylabel('Speed (m/s)')

@@ -23,7 +23,7 @@ Damping = Damping_Matrix(desState, p);
 Stiffness = Stiffness_Matrix(desState, p);
 
 nOut = I*desAcc + Corr + Grav + Damping*desVel + Stiffness*desPos;
-% nOut = I*desAcc + Corr + Grav + Stiffness*desPos;
+% nOut = I*desAcc + Corr + Grav + Damping*desVel;
 
 
 end

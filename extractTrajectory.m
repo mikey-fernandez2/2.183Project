@@ -41,7 +41,7 @@ legend({'Shoulder', 'Elbow', 'Wrist'})
 sgtitle('Desired Joint Kinematics')
 
 save('ComputedTorqueTrajectory.mat', 'pos', 'vel', 'acc')
-
+gi
 
 % % raw = readtable(fileName);
 % % data = raw;

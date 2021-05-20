@@ -23,7 +23,7 @@ r1 = 0.484*l1; r2 = 0.439*l2; r3 = 0.506*l3;    % m, distance to center of mass 
 rg1 = 0.322*l1; rg2 = 0.303*l2; rg3 = 0.297*l3; % m, radius of gyration of each link 
 Ic1 = m1*rg1^2; Ic2 = m2*rg2^2; Ic3 = m3*rg3^2; % kg-m^2, moment of inertia about mass center
 g = 9.81;                                       % m/s^2, gravity constant
-k1 = 0; k2 = 0; k3 = 0;                         % N-m/rad, joint stiffness constants
+k1 = 2; k2 = 2; k3 = 2;                         % N-m/rad, joint stiffness constants
 b1 = 0.1; b2 = 0.1; b3 = 0.1;                         % N-m-s/rad, joint damping constants
 l_max = l1 + l2 + l3;                           % m, maximum arm reach
 
